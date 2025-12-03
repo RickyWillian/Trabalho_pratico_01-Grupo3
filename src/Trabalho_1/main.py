@@ -5,10 +5,15 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import RSLPStemmer
 
-COLECAO_DOCUMENTOS = {}
-VOCABULARIO = {}
+STEMMER = RSLPStemmer()
+STOPWORDS_PORTUGUES = set(stopwords.words('portuguese'))
 
-def ler_jason(nome_arquivo):
+COLECAO_DOCUMENTOS = {}
+VOCABULARIO = set()  #evita duplicação automatica no vocabulario 
+INDICE_PROXIMO_DOC = 0
+DADOS_JSON = None
+
+def ler_json(nome_arquivo):
     caminho_base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     caminho_arquivo = os.path.join(caminho_base, 'data', nome_arquivo)
 
@@ -36,7 +41,7 @@ def preprocessar_documento(texto, stemmer, stopwords_portugues):
 
 
 def add_all_doc():
-    dados = ler_jason('colecao - trabalho 01.json')
+    dados = ler_json('colecao - trabalho 01.json')
 
     if dados:
         for doc in dados:
@@ -45,8 +50,30 @@ def add_all_doc():
 
             if doc_id is not None and conteudo is not None:
                 COLECAO_DOCUMENTOS[doc_id] = conteudo
-                tokens = preprocessar_documento(conteudo)
+                tokens = preprocessar_documento(conteudo,STEMMER, STOPWORDS_PORTUGUES)
                 VOCABULARIO.update(tokens)
+
+def add_docadoc():
+    global INDICE_PROXIMO_DOC
+    global DADOS_JSON
+    global VOCABULARIO
+
+    if DADOS_JSON is None:
+        DADOS_JSON = ler_json('colecao - trabalho 01.json')
+        if INDICE_PROXIMO_DOC < len(DADOS_JSON):
+            doc = DADOS_JSON[INDICE_PROXIMO_DOC]
+            doc_id = doc.get("name")
+            conteudo = doc.get("content")
+
+        if doc and conteudo:
+            COLECAO_DOCUMENTOS[doc_id] = conteudo
+            tokens = preprocessar_documento(conteudo, STEMMER, STOPWORDS_PORTUGUES)
+            VOCABULARIO.update(tokens)
+            print(f"Documento '{doc_id}' adicionado à coleção.")
+            INDICE_PROXIMO_DOC += 1
+    else:
+        print("Todos os documentos ja foram adicionados à coleção")
+
 
 def main():
     while 1:
@@ -67,8 +94,10 @@ def main():
         # Tentando organizar o menu para criar as respectivas funções
         match res:
             case 1:
+                add_docadoc()
                 break
             case 2:
+                add_all_doc()
                 break
             case 3:
                 break
