@@ -50,7 +50,7 @@ def add_all_doc():
 
 def main():
     while 1:
-        print("Digite um numero de 1 a 10 do menu:\n")
+        print("Digite um numero de 1 a 10 para as opções do menu:\n")
         print("1 - Adicionar um documento por vez à coleção")
         print("2 - Adicionar todos os documentos da lista.")
         print("3 - Remover um documento da coleção pelo seu identificador.")
@@ -64,6 +64,27 @@ def main():
         res = int(input())
         if(res==10):
             break
+        # Tentando organizar o menu para criar as respectivas funções
+        match res:
+            case 1:
+                break
+            case 2:
+                break
+            case 3:
+                break
+            case 4:
+                break
+            case 5:
+                break
+            case 6:
+                break
+            case 7:
+                break
+            case 8:
+                break
+            case 9:
+                break
+
 
 if __name__ == "__main__":
     main()
