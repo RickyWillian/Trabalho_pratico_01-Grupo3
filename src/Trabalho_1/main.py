@@ -50,6 +50,7 @@ def add_all_doc():
 
 def main():
     while 1:
+        print("Digite um numero de 1 a 10 do menu:\n")
         print("1 - Adicionar um documento por vez à coleção")
         print("2 - Adicionar todos os documentos da lista.")
         print("3 - Remover um documento da coleção pelo seu identificador.")
@@ -59,6 +60,10 @@ def main():
         print("7 - Realizar consultas booleanas.")
         print("8 - Realizar consultas por similaridade.")
         print("9 - Realizar consultas por frase.")
+        print("10 - Sair.")
+        res = int(input())
+        if(res==10):
+            break
 
 if __name__ == "__main__":
     main()
