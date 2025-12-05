@@ -74,6 +74,27 @@ def add_docadoc():
     else:
         print("Todos os documentos ja foram adicionados à coleção")
 
+def remover_documento(doc_id):
+    
+    if doc_id not in COLECAO_DOCUMENTOS:
+        print(f"Erro: O documento com ID '{doc_id}' não existe na coleção.")
+        return  
+
+    # Remover o documento
+    del COLECAO_DOCUMENTOS[doc_id]
+    print(f"Documento '{doc_id}' removido com sucesso.")
+
+   
+    global VOCABULARIO
+    VOCABULARIO_NOVO = set()
+
+    for conteudo in COLECAO_DOCUMENTOS.values():
+        tokens = preprocessar_documento(conteudo, STEMMER, STOPWORDS_PORTUGUES)
+        VOCABULARIO_NOVO.update(tokens)
+
+    VOCABULARIO = VOCABULARIO_NOVO
+    print("Vocabulário atualizado após remoção.")
+
 
 def main():
     while 1:
@@ -100,6 +121,8 @@ def main():
                 add_all_doc()
                 break
             case 3:
+                doc_id = input("Digite o identificador do documento a remover: ")
+                remover_documento(doc_id)
                 break
             case 4:
                 break
