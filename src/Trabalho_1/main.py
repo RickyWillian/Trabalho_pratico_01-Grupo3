@@ -4,6 +4,8 @@ import re
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import RSLPStemmer
+import pandas as pd
+import numpy as np
 
 STEMMER = RSLPStemmer()
 STOPWORDS_PORTUGUES = set(stopwords.words('portuguese'))
@@ -95,6 +97,40 @@ def remover_documento(doc_id):
     VOCABULARIO = VOCABULARIO_NOVO
     print("Vocabulário atualizado após remoção.")
 
+    #passo 2
+def construir_matriz_boolean(docs_processados, nomes_docs):
+    vocabulario = sorted(set([termo for doc in docs_processados for termo in doc]))
+    matriz = pd.DataFrame(0, index=vocabulario, columns=nomes_docs)
+    for nome, termos in zip(nomes_docs, docs_processados):
+        for termo in termos:
+            matriz.loc[termo, nome] = 1
+    return matriz
+
+# passos 3 e 4
+def calcular_tf(docs_processados, nomes_docs):
+
+    vocabulario = sorted(set([t for doc in docs_processados for t in doc]))
+    matriz_tf = pd.DataFrame(0.0, index=vocabulario, columns=nomes_docs)
+    for nome, termos in zip(nomes_docs, docs_processados):
+        for termo in termos:
+            matriz_tf.loc[termo, nome] += 1
+    # aplica log2 apenas onde TF > 0
+    matriz_tf = matriz_tf.map(lambda x: 1 + np.log2(x) if x > 0 else 0)
+    return matriz_tf
+
+# passo 5
+def calcular_idf(matriz_tf):
+    N = matriz_tf.shape[1]
+    ni = (matriz_tf > 0).sum(axis=1)
+    idf = np.log2(N / ni)
+    return pd.Series(idf, index=matriz_tf.index, name="IDF")
+
+
+# passo 6
+def calcular_tfidf(matriz_tf, idf):
+    matriz_tfidf = matriz_tf.mul(idf, axis=0)
+    return matriz_tfidf
+
 
 def main():
     while 1:
@@ -125,8 +161,29 @@ def main():
                 remover_documento(doc_id)
                 break
             case 4:
+                print("\n--- Vocabulário Atualizado ---\n")
+                if not VOCABULARIO:
+                    print("O vocabulário está vazio. Adicione documentos primeiro.")
+                else:
+                    # Exibe o vocabulário ordenado alfabeticamente para melhor visualização
+                    vocabulario_ordenado = sorted(list(VOCABULARIO))
+                    print(vocabulario_ordenado)
                 break
             case 5:
+                if not COLECAO_DOCUMENTOS:
+                    print("Não há documentos na coleção para construir a matriz.")
+                    break
+                nomes_docs = list(COLECAO_DOCUMENTOS.keys())
+                docs_processados = []
+                for conteudo in COLECAO_DOCUMENTOS.values():
+                    tokens = preprocessar_documento(conteudo, STEMMER, STOPWORDS_PORTUGUES)
+                    docs_processados.append(tokens)
+                matriz_tf = calcular_tf(docs_processados, nomes_docs)
+                idf = calcular_idf(matriz_tf)
+                matriz_tfidf = calcular_tfidf(matriz_tf, idf)
+
+                print("\n--- Matriz TF-IDF ---\n")
+                print(matriz_tfidf)
                 break
             case 6:
                 break
